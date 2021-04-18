@@ -20,6 +20,7 @@ client.connect(err => {
     const serviceCollection = client.db("businessGuru").collection("serviceList");
     const reviewsCollection = client.db("businessGuru").collection("review");
     const ordersCollection = client.db("businessGuru").collection("orders");
+    const adminsCollection = client.db("businessGuru").collection("admins");
 
     app.post('/addService', (req, res) => {
         const newServiceData = (req.body)
@@ -81,6 +82,37 @@ client.connect(err => {
                     res.send(modifiedCount > 0)
             })
 
+    })
+
+    app.get('/showBookings', (req, res) => {
+        const userEmail = req.query.email
+        ordersCollection.find({ email: userEmail })
+            .toArray((err, orderedService) => {
+                res.send(orderedService)
+            })
+    })
+
+    app.post('/addAdmin', (req, res) => {
+        const addNewAdmin = (req.body)
+        adminsCollection.insertOne(addNewAdmin)
+            .then(result => {
+                console.log(result);
+                res.send(result.insertedCount > 0)
+            })
+    })
+
+    app.post('/isAdmin', (req, res) => {
+        const userEmail = req.body.email
+        adminsCollection.find({ email: userEmail })
+            .toArray((err, admin) => {
+                res.send(admin.length > 0)
+            })
+    })
+
+    app.delete('/remove/:id', (req, res) => {
+        const id = req.params.id
+        serviceCollection.deleteOne({ _id: ObjectID(id) })
+            .then(documents => res.send(!!documents.value))
     })
 });
 // app.get('/', (req, res) => {
